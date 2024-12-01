@@ -9,6 +9,7 @@ from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import TransferInfo, RefreshMediaItem, ServiceInfo
 from app.schemas.types import EventType
+import os
 
 
 class StrmServerRefresh(_PluginBase):
@@ -43,8 +44,10 @@ class StrmServerRefresh(_PluginBase):
             self._enabled = config.get("enabled")
             self._delay = config.get("delay") or 0
             self._mediaservers = config.get("mediaservers") or []
-            self._strmpath = config.get("strm_path")
-            self._alistpath = config.get("alist_path")
+            strmpath = config.get("strm_path")
+            self._strmpath = strmpath.rstrip('/') + '/' if strmpath else ''
+            path = config.get("alist_path")
+            self._alistpath = path.rstrip('/') + '/' if path else ''
 
     @property
     def service_infos(self) -> Optional[Dict[str, ServiceInfo]]:
@@ -220,11 +223,10 @@ class StrmServerRefresh(_PluginBase):
             return
 
         if self._strmpath:
-            strm_content = self.__format_content(file_path=str(transferinfo.file_list_new))
-            self.__gen_strm()
-            # 生成strm文件
-            # self.__create_strm_file(strm_file=target_file,
-            #                         strm_content=strm_content)
+            target_item = transferinfo.target_diritem
+            strm_content = self._alistpath + target_item.path + target_item.name
+
+            self.__gen_strm(target_item.path, target_item.name, strm_content)
         if self._delay:
             logger.info(f"延迟 {self._delay} 秒后刷新媒体库... ")
             time.sleep(float(self._delay))
@@ -261,10 +263,24 @@ class StrmServerRefresh(_PluginBase):
         """
         pass
 
-    def __format_content(self, file_path):
-        logger.error(f"当前filepath: {file_path}")
-        pass
+    def __gen_strm(self, dir, name, content):
+        try:
+            # 构建完整的目录路径
+            dir_path = os.path.join(self._strmpath, dir)
 
-    def __gen_strm(self):
-        logger.error(f"读取到的")
-        pass
+            # 确保目录存在，如果不存在则创建
+            os.makedirs(dir_path, exist_ok=True)
+
+            # 构建 .strm 文件的完整路径
+            strm_file = os.path.join(dir_path, f"{name}.strm")
+
+            # 写入内容到文件
+            with open(strm_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            logger.info(f"生成STRM文件: {strm_file}")
+            return True
+
+        except Exception as e:
+            logger.error(f"生成STRM文件失败: {str(e)}")
+            return False
