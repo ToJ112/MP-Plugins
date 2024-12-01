@@ -46,6 +46,7 @@ class StrmServerRefresh(_PluginBase):
             self._mediaservers = config.get("mediaservers") or []
             strmpath = config.get("strm_path")
             self._strmpath = strmpath.rstrip('/') + '/' if strmpath else ''
+            logger.info(f"strmpath={strmpath}")
             path = config.get("alist_path")
             self._alistpath = path.rstrip('/') + '/' if path else ''
 
@@ -230,7 +231,7 @@ class StrmServerRefresh(_PluginBase):
             target_item = transferinfo.target_diritem
             strm_content = self._alistpath + target_item.path + target_item.name
 
-            self.__gen_strm(target_item.path, target_item.name, strm_content)
+            self.__gen_strm(dir=target_item.path, name=target_item.name, content=strm_content)
         if self._delay:
             logger.info(f"延迟 {self._delay} 秒后刷新媒体库... ")
             time.sleep(float(self._delay))
