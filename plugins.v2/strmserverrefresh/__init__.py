@@ -5,6 +5,7 @@ from typing import Any, List, Dict, Tuple, Optional
 from app.core.context import MediaInfo
 from app.core.event import eventmanager, Event
 from app.helper.mediaserver import MediaServerHelper
+from app.schemas.types import MediaType
 from app.log import logger
 from app.plugins import _PluginBase
 from app.schemas import TransferInfo, RefreshMediaItem, ServiceInfo
@@ -224,18 +225,19 @@ class StrmServerRefresh(_PluginBase):
         transferinfo: TransferInfo = event_info.get("transferinfo")
         if not transferinfo or not transferinfo.target_diritem or not transferinfo.target_diritem.path:
             return
-
+        mediainfo: MediaInfo = event_info.get("mediainfo")
         if self._strmpath:
-            target_item_path = str(transferinfo.target_diritem.path)
+            season = ''
+            if mediainfo.type == MediaType.TV:
+                season = "Season {:01d}".format(mediainfo.season)
+            target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
             file_name = str(transferinfo.target_item.name)
-            strm_content = self._alistpath + target_item_path + file_name
+            strm_content = self._alistpath + target_item_path + season + "/" + file_name
 
-            self.__gen_strm(target_dir=target_item_path, filename=file_name, content=strm_content)
+            self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
         if self._delay:
             logger.info(f"延迟 {self._delay} 秒后刷新媒体库... ")
             time.sleep(float(self._delay))
-
-        mediainfo: MediaInfo = event_info.get("mediainfo")
 
         items = [
             RefreshMediaItem(
@@ -267,11 +269,10 @@ class StrmServerRefresh(_PluginBase):
         """
         pass
 
-    def __gen_strm(self, target_dir, filename, content):
+    def __gen_strm(self, season, target_dir, filename, content):
         try:
             # 构建完整的目录路径
-            dir_path = os.path.join(self._strmpath, target_dir.lstrip('/'))
-            logger.info(f"read strmpath={dir_path}")
+            dir_path = os.path.join(self._strmpath, target_dir, season)
             # 确保目录存在，如果不存在则创建
             os.makedirs(dir_path, exist_ok=True)
             name_without_ext = str(filename[:filename.rfind('.')])
