@@ -123,7 +123,6 @@ class StrmServerRefresh(_PluginBase):
                                 'component': 'VCol',
                                 'props': {
                                     'cols': 12,
-                                    'md': 4
                                 },
                                 'content': [
                                     {
@@ -141,7 +140,7 @@ class StrmServerRefresh(_PluginBase):
                                         'component': 'VCol',
                                         'props': {
                                             'cols': 12,
-                                            'md': 4
+                                            'md': 8
                                         },
                                         'content': [
                                             {
@@ -165,7 +164,7 @@ class StrmServerRefresh(_PluginBase):
                                 'component': 'VCol',
                                 'props': {
                                     'cols': 12,
-                                    'md': 8
+                                    'md': 6
                                 },
                                 'content': [
                                     {
@@ -181,7 +180,7 @@ class StrmServerRefresh(_PluginBase):
                                 'component': 'VCol',
                                 'props': {
                                     'cols': 12,
-                                    'md': 8
+                                    'md': 6
                                 },
                                 'content': [
                                     {
