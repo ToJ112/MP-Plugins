@@ -46,7 +46,6 @@ class StrmServerRefresh(_PluginBase):
             self._mediaservers = config.get("mediaservers") or []
             strmpath = config.get("strm_path")
             self._strmpath = strmpath.rstrip('/') + '/' if strmpath else ''
-            logger.info(f"strmpath={strmpath}")
             path = config.get("alist_path")
             self._alistpath = path.rstrip('/') + '/' if path else ''
 
@@ -227,10 +226,11 @@ class StrmServerRefresh(_PluginBase):
             return
 
         if self._strmpath:
-            target_item = transferinfo.target_diritem
-            strm_content = self._alistpath + target_item.path + target_item.name
+            target_item_path = transferinfo.target_diritem.path
+            file_name = transferinfo.fileitem.name
+            strm_content = self._alistpath + target_item_path + file_name
 
-            self.__gen_strm(dir=target_item.path, name=target_item.name, content=strm_content)
+            self.__gen_strm(target_dir=target_item_path, name=file_name, content=strm_content)
         if self._delay:
             logger.info(f"延迟 {self._delay} 秒后刷新媒体库... ")
             time.sleep(float(self._delay))
@@ -267,16 +267,16 @@ class StrmServerRefresh(_PluginBase):
         """
         pass
 
-    def __gen_strm(self, dir, name, content):
+    def __gen_strm(self, target_dir, filename, content):
         try:
             # 构建完整的目录路径
-            dir_path = os.path.join(self._strmpath, dir)
-
+            dir_path = os.path.join(self._strmpath, target_dir.lstrip('/'))
+            logger.info(f"read strmpath={dir_path}")
             # 确保目录存在，如果不存在则创建
             os.makedirs(dir_path, exist_ok=True)
-
+            name_without_ext = filename[:filename.rfind('.')]
             # 构建 .strm 文件的完整路径
-            strm_file = os.path.join(dir_path, f"{name}.strm")
+            strm_file = os.path.join(str(dir_path), str(f"{name_without_ext}.strm"))
 
             # 写入内容到文件
             with open(strm_file, 'w', encoding='utf-8') as f:
