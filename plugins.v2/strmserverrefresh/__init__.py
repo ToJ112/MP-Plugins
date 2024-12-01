@@ -220,7 +220,7 @@ class StrmServerRefresh(_PluginBase):
             return
 
         if self._strmpath:
-            strm_content = self.__format_content(file_path=str(transferinfo.target_diritem.path))
+            strm_content = self.__format_content(file_path=str(transferinfo.file_list_new))
             self.__gen_strm()
             # 生成strm文件
             # self.__create_strm_file(strm_file=target_file,
