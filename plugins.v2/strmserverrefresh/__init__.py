@@ -14,7 +14,7 @@ import os
 
 class StrmServerRefresh(_PluginBase):
     # 插件名称
-    plugin_name = "转移后strm落文件并刷新库"
+    plugin_name = "strm生成+刷库"
     # 插件描述
     plugin_desc = "入库后自动生成strm并更新Emby/Jellyfin/Plex服务器海报墙。"
     # 插件图标
