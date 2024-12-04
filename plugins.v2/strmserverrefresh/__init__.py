@@ -229,7 +229,8 @@ class StrmServerRefresh(_PluginBase):
         if self._strmpath:
             season = ''
             if mediainfo.type == MediaType.TV:
-                season = "Season {:01d}".format(mediainfo.season) + "/"
+                season = "Season {:01d}".format(mediainfo.season)
+                season = str(season) + "/"
             target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
             file_name = str(transferinfo.target_item.name)
             strm_content = self._alistpath + target_item_path + season + file_name
