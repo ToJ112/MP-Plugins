@@ -29,7 +29,7 @@ class StrmServerRefresh(_PluginBase):
     # 插件配置项ID前缀
     plugin_config_prefix = "strmserverrefresh_"
     # 加载顺序
-    plugin_order = 9
+    plugin_order = 8
     # 可使用的用户级别
     auth_level = 1
 
@@ -224,6 +224,7 @@ class StrmServerRefresh(_PluginBase):
         # 入库数据
         transferinfo: TransferInfo = event_info.get("transferinfo")
         if not transferinfo or not transferinfo.target_diritem or not transferinfo.target_diritem.path:
+            logger.info(f"transferinfo读不到")
             return
         mediainfo: MediaInfo = event_info.get("mediainfo")
         if self._strmpath:
