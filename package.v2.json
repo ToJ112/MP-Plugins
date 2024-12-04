@@ -3,11 +3,12 @@
         "name": "strm生成+刷库",
         "description": "入库后自动生成strm并更新Emby/Jellyfin/Plex服务器海报墙。",
         "labels": "媒体库",
-        "version": "0.0.2",
+        "version": "0.0.3",
         "icon": "refresh.png",
         "author": "jtning",
         "level": 1,
         "history": {
+            "v0.0.3": "优先级调整",
             "v0.0.2": "添加strm生成",
             "v0.0.1": "init"
         }
