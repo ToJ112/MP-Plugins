@@ -11,6 +11,7 @@ from app.plugins import _PluginBase
 from app.schemas import TransferInfo, RefreshMediaItem, ServiceInfo
 from app.schemas.types import EventType
 import os
+import re
 
 
 class StrmServerRefresh(_PluginBase):
@@ -210,6 +211,7 @@ class StrmServerRefresh(_PluginBase):
         """
         发送通知消息
         """
+        logger.info(f"开始刷新")
         if not self._enabled:
             return
 
@@ -217,26 +219,28 @@ class StrmServerRefresh(_PluginBase):
         if not event_info:
             return
 
-        # 刷新媒体库
-        if not self.service_infos:
-            return
-
         # 入库数据
         transferinfo: TransferInfo = event_info.get("transferinfo")
         if not transferinfo or not transferinfo.target_diritem or not transferinfo.target_diritem.path:
-            logger.info(f"transferinfo读不到")
             return
         mediainfo: MediaInfo = event_info.get("mediainfo")
         if self._strmpath:
             season = ''
             if mediainfo.type == MediaType.TV:
-                season = "Season {:01d}".format(mediainfo.season)
-                season = str(season) + "/"
+                real_season = mediainfo.season
+                if not mediainfo.season and transferinfo.target_item and transferinfo.target_item.basename:
+                    real_season = self.__extract_season(transferinfo.target_item.basename)
+                season = "Season {:01d}".format(real_season) + "/"
             target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
             file_name = str(transferinfo.target_item.name)
             strm_content = self._alistpath + target_item_path + season + file_name
 
             self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
+
+        # 刷新媒体库
+        if not self.service_infos:
+            return
+
         if self._delay:
             logger.info(f"延迟 {self._delay} 秒后刷新媒体库... ")
             time.sleep(float(self._delay))
@@ -291,3 +295,12 @@ class StrmServerRefresh(_PluginBase):
         except Exception as e:
             logger.error(f"生成STRM文件失败: {str(e)}")
             return False
+
+    def __extract_season(title):
+        # 匹配 - 后面的 S + 任意数字
+        pattern = r'-\s*S(\d+)'
+        match = re.search(pattern, title, re.IGNORECASE)
+
+        if match:
+            return int(match.group(1))
+        return None
