@@ -211,7 +211,6 @@ class StrmServerRefresh(_PluginBase):
         """
         发送通知消息
         """
-        logger.info(f"开始刷新")
         if not self._enabled:
             return
 
@@ -235,7 +234,8 @@ class StrmServerRefresh(_PluginBase):
                         season_num = int(mediainfo.season)
                         if season_num > 0:
                             real_season = season_num
-                    except (ValueError, TypeError):
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Error converting mediainfo.season: {e}")
                         pass
 
                 # 尝试从文件名提取季数
@@ -244,14 +244,13 @@ class StrmServerRefresh(_PluginBase):
                     if extracted_season and extracted_season > 0:
                         real_season = extracted_season
 
-                # 格式化季数文件夹名称，使用两位数字格式
+                # 格式化季数文件夹名称
                 season = f"Season {real_season:01d}/"
-            target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
-            file_name = str(transferinfo.target_item.name)
-            strm_content = self._alistpath + target_item_path + season + file_name
-
-            self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
-
+                logger.debug(f"Formatted season string: {season}")
+                target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
+                file_name = str(transferinfo.target_item.name)
+                strm_content = self._alistpath + target_item_path + season + file_name
+                self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
         # 刷新媒体库
         if not self.service_infos:
             return
@@ -311,11 +310,15 @@ class StrmServerRefresh(_PluginBase):
             logger.error(f"生成STRM文件失败: {str(e)}")
             return False
 
-    def __extract_season(title):
-        # 匹配 - 后面的 S + 任意数字
-        pattern = r'-\s*S(\d+)'
-        match = re.search(pattern, title, re.IGNORECASE)
+    def __extract_season(self, title):
+        try:
+            pattern = r'-\s*S(\d+)'
+            match = re.search(pattern, title, re.IGNORECASE)
 
-        if match:
-            return int(match.group(1))
-        return None
+            if match:
+                season = int(match.group(1))
+                return season
+            return None
+        except Exception as e:
+            logger.error(f"Error extracting season from title: {e}")
+            return None
