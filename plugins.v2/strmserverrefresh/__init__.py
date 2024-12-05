@@ -227,10 +227,25 @@ class StrmServerRefresh(_PluginBase):
         if self._strmpath:
             season = ''
             if mediainfo.type == MediaType.TV:
-                real_season = mediainfo.season
-                if not mediainfo.season and transferinfo.target_item and transferinfo.target_item.basename:
-                    real_season = self.__extract_season(transferinfo.target_item.basename)
-                season = "Season {:01d}".format(real_season) + "/"
+                real_season = 0
+
+                # 尝试从 mediainfo.season 获取季数
+                if mediainfo.season:
+                    try:
+                        season_num = int(mediainfo.season)
+                        if season_num > 0:
+                            real_season = season_num
+                    except (ValueError, TypeError):
+                        pass
+
+                # 尝试从文件名提取季数
+                if transferinfo.target_item and transferinfo.target_item.basename:
+                    extracted_season = self.__extract_season(transferinfo.target_item.basename)
+                    if extracted_season and extracted_season > 0:
+                        real_season = extracted_season
+
+                # 格式化季数文件夹名称，使用两位数字格式
+                season = f"Season {real_season:01d}/"
             target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
             file_name = str(transferinfo.target_item.name)
             strm_content = self._alistpath + target_item_path + season + file_name
