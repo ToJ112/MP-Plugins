@@ -247,10 +247,10 @@ class StrmServerRefresh(_PluginBase):
                 # 格式化季数文件夹名称
                 season = f"Season {real_season:01d}/"
                 logger.debug(f"Formatted season string: {season}")
-                target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
-                file_name = str(transferinfo.target_item.name)
-                strm_content = self._alistpath + target_item_path + season + file_name
-                self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
+            target_item_path = str(transferinfo.target_diritem.path).lstrip('/')
+            file_name = str(transferinfo.target_item.name)
+            strm_content = self._alistpath + target_item_path + season + file_name
+            self.__gen_strm(season=season, target_dir=target_item_path, filename=file_name, content=strm_content)
         # 刷新媒体库
         if not self.service_infos:
             return
